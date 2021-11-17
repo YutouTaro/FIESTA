@@ -57,23 +57,23 @@ void Raycast(const Eigen::Vector3d &start, const Eigen::Vector3d &end,
              const Eigen::Vector3d &min, const Eigen::Vector3d &max,
              std::vector<Eigen::Vector3d> *output) {
 //    std::cout << start << ' ' << end << std::endl;
-    // From "A Fast Voxel Traversal Algorithm for Ray Tracing"
-    // by John Amanatides and Andrew Woo, 1987
-    // <http://www.cse.yorku.ca/~amana/research/grid.pdf>
-    // <http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.42.3443>
-    // Extensions to the described algorithm:
-    //   • Imposed a distance_ limit.
-    //   • The face passed through to reach the current cube is provided to
-    //     the callback.
+     /*From "A Fast Voxel Traversal Algorithm for Ray Tracing"
+     by John Amanatides and Andrew Woo, 1987
+     <http://www.cse.yorku.ca/~amana/research/grid.pdf>
+     <http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.42.3443>
+     Extensions to the described algorithm:
+       • Imposed a distance_ limit.
+       • The face passed through to reach the current cube is provided to
+         the callback.
 
-    // The foundation of this algorithm is a parameterized representation of
-    // the provided ray,
-    //                    origin + t * dirs_,
-    // except that t is not actually stored; rather, at any given point_ in the
-    // traversal, we keep track of the *greater* t values which we would have
-    // if we took a step sufficient to cross a cube boundary along that axis
-    // (i.e. change the integer part of the coordinate) in the variables
-    // tMaxX, tMaxY, and tMaxZ.
+     The foundation of this algorithm is a parameterized representation of
+     the provided ray,
+                        origin + t * dirs_,
+     except that t is not actually stored; rather, at any given point_ in the
+     traversal, we keep track of the *greater* t values which we would have
+     if we took a step sufficient to cross a cube boundary along that axis
+     (i.e. change the integer part of the coordinate) in the variables
+     tMaxX, tMaxY, and tMaxZ. */
 
     // Cube containing origin point_.
     int x = (int) std::floor(start.x());
@@ -132,10 +132,10 @@ void Raycast(const Eigen::Vector3d &start, const Eigen::Vector3d &end,
 
         if (x == endX && y == endY && z == endZ) break;
 
-        // tMaxX stores the t-value at which we cross a cube boundary along the
-        // X axis, and similarly for Y and Z. Therefore, choosing the least tMax
-        // chooses the closest cube boundary. Only the first case of the four
-        // has been commented in detail.
+        /* tMaxX stores the t-value at which we cross a cube boundary along the
+         * X axis, and similarly for Y and Z. Therefore, choosing the least tMax
+         * chooses the closest cube boundary. Only the first case of the four
+         * has been commented in detail. */
         if (tMaxX < tMaxY) {
             if (tMaxX < tMaxZ) {
                 // Update which cube we are now in.
