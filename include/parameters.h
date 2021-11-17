@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <Eigen/Eigen>
 #define PROBABILISTIC
-//#define HASH_TABLE
+#define HASH_TABLE
 #define BLOCK
 #define BITWISE
 #define DEBUG
