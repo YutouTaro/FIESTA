@@ -88,12 +88,12 @@ template<class DepthMsgType, class PoseMsgType>
 Fiesta<DepthMsgType, PoseMsgType>::Fiesta(ros::NodeHandle node) {
      parameters_.SetParameters(node);
 #ifdef HASH_TABLE
-     esdf_map_ = new ESDFMap(Eigen::Vector3d(0, 0, 0), parameters_.resolution_, parameters_.reserved_size_);
+     esdf_map_ = new ESDFMap(Eigen::Vector3d(0, 0, 0), parameters_.resolution_, parameters_.reserved_size_); std::cout << "Using HASH_TABLE" << std::endl;
 #ifdef SIGNED_NEEDED
        inv_esdf_map_ = new ESDFMap(Eigen::Vector3d(0, 0, 0), parameters_.resolution_, parameters_.reserved_size_);
 #endif
 #else
-     esdf_map_ = new ESDFMap(parameters_.l_cornor_, parameters_.resolution_, parameters_.map_size_);
+     esdf_map_ = new ESDFMap(parameters_.l_cornor_, parameters_.resolution_, parameters_.map_size_); std::cout << "Using ARRAY" << std::endl;
 #ifdef SIGNED_NEEDED
      inv_esdf_map_ = new ESDFMap(parameters_.l_cornor_, parameters_.resolution_, parameters_.map_size_);
 #endif
@@ -114,7 +114,7 @@ Fiesta<DepthMsgType, PoseMsgType>::Fiesta(ros::NodeHandle node) {
 //     depth_sub_ = node.subscribe("/camera/depth/image_rect_raw", 10, &Fiesta::DepthCallback, this);
     transform_sub_ = node.subscribe("transform", 10, &Fiesta::PoseCallback, this);
     depth_sub_ = node.subscribe("depth", 10, &Fiesta::DepthCallback, this);
-
+/*
      // Cow_and_Lady
      // depth_sub_ = node.subscribe("/camera/depth_registered/points", 1000, PointcloudCallback);
      // transform_sub_ = node.subscribe("/kinect/vrpn_client/estimated_transform", 1000, PoseCallback);
@@ -122,7 +122,7 @@ Fiesta<DepthMsgType, PoseMsgType>::Fiesta(ros::NodeHandle node) {
      //EuRoC
 //    depth_sub_ = node.subscribe("/dense_stereo/pointcloud", 1000, PointcloudCallback);
 //    transform_sub_ = node.subscribe("/vicon/firefly_sbx/firefly_sbx", 1000, PoseCallback);
-
+*/
      slice_pub_ = node.advertise<visualization_msgs::Marker>("ESDFMap/slice", 1, true);
      occupancy_pub_ = node.advertise<sensor_msgs::PointCloud>("ESDFMap/occ_pc", 1, true);
      text_pub_ = node.advertise<visualization_msgs::Marker>("ESDFMap/text", 1, true);
