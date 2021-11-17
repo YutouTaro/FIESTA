@@ -160,7 +160,7 @@ struct Parameters {
   bool global_vis_, global_update_, global_map_;
   Eigen::Vector3d radius_;
   // transforms
-  Eigen::Matrix4d T_B_C_, T_D_B_;
+  Eigen::Matrix4d T_B_C_, T_D_B_; // Body to Camera, Depth to Body
 
 
   void SetParameters(const ros::NodeHandle &node);
