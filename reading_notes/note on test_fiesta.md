@@ -35,6 +35,7 @@ rosbag play ./rosbag/data.bag
   - slice
   - occupancy
   - text
+- 定时循环运行 [UpdateEsdfEvent()](#UpdateEsdfEvent)
 
 
 
@@ -88,6 +89,46 @@ rosbag play ./rosbag/data.bag
 
 `void Fiesta<DepthMsgType, PoseMsgType>::RaycastMultithread()`<a name=RaycastMultithread></a>
 
+- parameters\_.ray\_cast\_num\_thread_==0
+  - 单线程处理 [RaycastProcess()](#RaycastProcess)
+- parameters\_.ray_cast_num_thread_ > 0
+  - 多线程处理 [RaycastProcess()](#RaycastProcess)
+  - 修改launch中的参数, 程序出错, 待续
+
+
+
+
+
+`void Fiesta<DepthMsgType, PoseMsgType>::RaycastProcess(int i, int part, int tt)`<a name=RaycastProcess></a>
+
+- ![Fiesta-ln204](./pic1/Fiesta-ln204.png)
+- 对于点云里的每一个点:
+  - 转换到世界坐标系
+  - 如果超出ray最长距离, 截断到最长距离
+    - 只考虑最长距离, 也就是到视线极限仍然是空
+    - tmp_idx = esdf_map_->[SetOccupancy(pos, 0)](#SetOccupancy_pos) 设置为0 - free
+  - tmp_idx = esdf_map_->[SetOccupancy(pos, 1)](#SetOccupancy_pos) 设置为1 - occupy
+  - 设置set_occ_对应的tmp_idx
+    - (HASH_TABLE) `set_occ_.insert(tmp_idx)`
+    - (ARRAY) `set_occ_[tmp_idx] = tt`
+  - ![ESDFMap-ln423](./pic1/Fiesta-ln233.png)
+  - output是光线经过的所有格子的坐标
+  - ![Fiesta-ln239](./pic1/Fiesta-ln239.png)
+  - 对于output中的每一个格子坐标(int), 从最远的开始:
+    - tmp 计算格子中心点坐标(double)
+    - length 到光心的距离
+      - 用于判断点是否落在min_ray_length和max_ray_length范围内
+    - `tmp_idx = esdf_map_->SetOccupancy(tmp, 0)` 该处occupancy状态设置为0
+    - 如果tmp_idx已经在set_free_存在
+      - 说明后面坐标都已经raycast过了
+      - break
+
+
+
+
+
+`void Fiesta<DepthMsgType, PoseMsgType>::UpdateEsdfEvent(const ros::TimerEvent & /*event*/)`<a name=UpdateEsdfEvent></a>
+
 
 
 
@@ -96,7 +137,7 @@ rosbag play ./rosbag/data.bag
 
 ## src/ESDFMap.cpp
 
-### ESDFMap()<a name=ESDFMap></a>
+`fiesta::ESDFMap::ESDFMap(...)`<a name=ESDFMap></a>
 
 array模式
 
@@ -119,3 +160,30 @@ array模式
 HASH_TABLE模式
 
 - ***待续***
+
+
+
+
+
+`int fiesta::ESDFMap::SetOccupancy(Eigen::Vector3d pos, int occ)`<a name=SetOccupancy_pos></a>
+
+- `Pos2Vox(pos, vox)` pos转换成vox
+- return [SetOccupancy(vox, occ)](#SetOccupancy_vox)
+
+
+
+`int fiesta::ESDFMap::SetOccupancy(Eigen::Vector3i vox, int occ)` <a name=SetOccupancy_vox></a>
+
+- `idx = Vox2Idx(vox)` vox转换成idx
+- 如果vox在地图内
+- ![ESDFMap-ln423](./pic1/ESDFMap-ln423.png)
+  - 只要光线穿过num_miss_就加一
+  - num_hit_ 加上occ(0-free, 1-occupy)
+- 只被光线穿过一次的
+  - （vox, 0.0）加入occupancy_queue_队列
+    - 后续的处理在 [UpdateOccupancy()](#UpdateOccupancy)
+
+
+
+`bool fiesta::ESDFMap::UpdateOccupancy(bool global_map)`<a name=UpdateOccupancy></a>
+
