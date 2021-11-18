@@ -234,40 +234,40 @@ bool fiesta::ESDFMap::CheckUpdate() {
 
 bool fiesta::ESDFMap::UpdateOccupancy(bool global_map) {
 #ifdef PROBABILISTIC
-  cout << "Occupancy Update" << ' ' << occupancy_queue_.size() << '\t';
-  while (!occupancy_queue_.empty()) {
-    QueueElement xx = occupancy_queue_.front();
-    occupancy_queue_.pop();
-    int idx = Vox2Idx(xx.point_);
-    int occupy = Exist(idx);
-    double log_odds_update = (num_hit_[idx] >= num_miss_[idx] - num_hit_[idx] ? prob_hit_log_ : prob_miss_log_);
+    cout << "Occupancy Update" << ' ' << occupancy_queue_.size() << '\t';
+    while (!occupancy_queue_.empty()) {
+      QueueElement xx = occupancy_queue_.front();
+      occupancy_queue_.pop();
+      int idx = Vox2Idx(xx.point_);
+      int occupy = Exist(idx);
+      double log_odds_update = (num_hit_[idx] >= num_miss_[idx] - num_hit_[idx] ? prob_hit_log_ : prob_miss_log_);
 
-    num_hit_[idx] = num_miss_[idx] = 0;
-    if (distance_buffer_[idx] < 0) {
-      distance_buffer_[idx] = infinity_;
-      InsertIntoList(reserved_idx_4_undefined_, idx);
+      num_hit_[idx] = num_miss_[idx] = 0;
+      if (distance_buffer_[idx] < 0) {
+        distance_buffer_[idx] = infinity_;
+        InsertIntoList(reserved_idx_4_undefined_, idx);
+      }
+      if ((log_odds_update >= 0 &&
+          occupancy_buffer_[idx] >= clamp_max_log_) ||
+          (log_odds_update <= 0 &&
+              occupancy_buffer_[idx] <= clamp_min_log_)) {
+        continue;
+      }
+      if (!global_map && !VoxInRange(xx.point_, false)) {
+        occupancy_buffer_[idx] = 0;
+        distance_buffer_[idx] = infinity_;
+      }
+      occupancy_buffer_[idx] = std::min(
+          std::max(occupancy_buffer_[idx] + log_odds_update, clamp_min_log_),
+          clamp_max_log_);
+      if (Exist(idx) && !occupy) {
+        insert_queue_.push(QueueElement{xx.point_, 0.0});
+      } else if (!Exist(idx) && occupy) {
+        delete_queue_.push(QueueElement{xx.point_, (double) infinity_});
+      }
     }
-    if ((log_odds_update >= 0 &&
-        occupancy_buffer_[idx] >= clamp_max_log_) ||
-        (log_odds_update <= 0 &&
-            occupancy_buffer_[idx] <= clamp_min_log_)) {
-      continue;
-    }
-    if (!global_map && !VoxInRange(xx.point_, false)) {
-      occupancy_buffer_[idx] = 0;
-      distance_buffer_[idx] = infinity_;
-    }
-    occupancy_buffer_[idx] = std::min(
-        std::max(occupancy_buffer_[idx] + log_odds_update, clamp_min_log_),
-        clamp_max_log_);
-    if (Exist(idx) && !occupy) {
-      insert_queue_.push(QueueElement{xx.point_, 0.0});
-    } else if (!Exist(idx) && occupy) {
-      delete_queue_.push(QueueElement{xx.point_, (double) infinity_});
-    }
-  }
 #endif
-  return !insert_queue_.empty() || !delete_queue_.empty();
+    return !insert_queue_.empty() || !delete_queue_.empty();
 }
 
 void fiesta::ESDFMap::UpdateESDF() {
