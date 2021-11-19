@@ -18,38 +18,38 @@ namespace fiesta {
 // Connectivity used in BFS
 // region DIRECTION
 //    const static int num_dirs_ = 6; // only faces
-//    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
-//                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
-//                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1)};
+/*    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
+                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
+                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1)}; */
 
 //    const static int num_dirs_ = 18; // faces & enges
-//    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
-//                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
-//                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1),
-//
-//                                         Eigen::Vector3i(-1, -1, 0), Eigen::Vector3i(1, 1, 0),
-//                                         Eigen::Vector3i(0, -1, -1), Eigen::Vector3i(0, 1, 1),
-//                                         Eigen::Vector3i(-1, 0, -1), Eigen::Vector3i(1, 0, 1),
-//                                         Eigen::Vector3i(-1, 1, 0), Eigen::Vector3i(1, -1, 0),
-//                                         Eigen::Vector3i(0, -1, 1), Eigen::Vector3i(0, 1, -1),
-//                                         Eigen::Vector3i(1, 0, -1), Eigen::Vector3i(-1, 0, 1)};
+/*    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
+                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
+                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1),
+
+                                         Eigen::Vector3i(-1, -1, 0), Eigen::Vector3i(1, 1, 0),
+                                         Eigen::Vector3i(0, -1, -1), Eigen::Vector3i(0, 1, 1),
+                                         Eigen::Vector3i(-1, 0, -1), Eigen::Vector3i(1, 0, 1),
+                                         Eigen::Vector3i(-1, 1, 0), Eigen::Vector3i(1, -1, 0),
+                                         Eigen::Vector3i(0, -1, 1), Eigen::Vector3i(0, 1, -1),
+                                         Eigen::Vector3i(1, 0, -1), Eigen::Vector3i(-1, 0, 1)}; */
 
 //    const static int num_dirs_ = 26; // faces & edges & vertices
-//    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
-//                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
-//                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1),
-//
-//                                         Eigen::Vector3i(-1, -1, 0), Eigen::Vector3i(1, 1, 0),
-//                                         Eigen::Vector3i(0, -1, -1), Eigen::Vector3i(0, 1, 1),
-//                                         Eigen::Vector3i(-1, 0, -1), Eigen::Vector3i(1, 0, 1),
-//                                         Eigen::Vector3i(-1, 1, 0), Eigen::Vector3i(1, -1, 0),
-//                                         Eigen::Vector3i(0, -1, 1), Eigen::Vector3i(0, 1, -1),
-//                                         Eigen::Vector3i(1, 0, -1), Eigen::Vector3i(-1, 0, 1),
-//
-//                                         Eigen::Vector3i(-1, -1, -1), Eigen::Vector3i(1, 1, 1),
-//                                         Eigen::Vector3i(-1, -1, 1), Eigen::Vector3i(1, 1, -1),
-//                                         Eigen::Vector3i(-1, 1, -1), Eigen::Vector3i(1, -1, 1),
-//                                         Eigen::Vector3i(1, -1, -1), Eigen::Vector3i(-1, 1, 1)};
+/*    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
+                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
+                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1),
+
+                                         Eigen::Vector3i(-1, -1, 0), Eigen::Vector3i(1, 1, 0),
+                                         Eigen::Vector3i(0, -1, -1), Eigen::Vector3i(0, 1, 1),
+                                         Eigen::Vector3i(-1, 0, -1), Eigen::Vector3i(1, 0, 1),
+                                         Eigen::Vector3i(-1, 1, 0), Eigen::Vector3i(1, -1, 0),
+                                         Eigen::Vector3i(0, -1, 1), Eigen::Vector3i(0, 1, -1),
+                                         Eigen::Vector3i(1, 0, -1), Eigen::Vector3i(-1, 0, 1),
+
+                                         Eigen::Vector3i(-1, -1, -1), Eigen::Vector3i(1, 1, 1),
+                                         Eigen::Vector3i(-1, -1, 1), Eigen::Vector3i(1, 1, -1),
+                                         Eigen::Vector3i(-1, 1, -1), Eigen::Vector3i(1, -1, 1),
+                                         Eigen::Vector3i(1, -1, -1), Eigen::Vector3i(-1, 1, 1)}; */
 
 const static int num_dirs_ = 24; // faces 2 steps
 const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
@@ -68,65 +68,65 @@ const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vect
                                           Eigen::Vector3i(0, 0, -2), Eigen::Vector3i(0, 0, 2)};
 
 //    const static int num_dirs_ = 32; // faces 2 steps & cornor
-//    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
-//                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
-//                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1),
-//
-//                                         Eigen::Vector3i(-1, -1, 0), Eigen::Vector3i(1, 1, 0),
-//                                         Eigen::Vector3i(0, -1, -1), Eigen::Vector3i(0, 1, 1),
-//                                         Eigen::Vector3i(-1, 0, -1), Eigen::Vector3i(1, 0, 1),
-//                                         Eigen::Vector3i(-1, 1, 0), Eigen::Vector3i(1, -1, 0),
-//                                         Eigen::Vector3i(0, -1, 1), Eigen::Vector3i(0, 1, -1),
-//                                         Eigen::Vector3i(1, 0, -1), Eigen::Vector3i(-1, 0, 1),
-//
-//                                         Eigen::Vector3i(-2, 0, 0), Eigen::Vector3i(2, 0, 0),
-//                                         Eigen::Vector3i(0, -2, 0), Eigen::Vector3i(0, 2, 0),
-//                                         Eigen::Vector3i(0, 0, -2), Eigen::Vector3i(0, 0, 2),
-//
-//                                         Eigen::Vector3i(-1, -1, -1), Eigen::Vector3i(1, 1, 1),
-//                                         Eigen::Vector3i(-1, -1, 1), Eigen::Vector3i(1, 1, -1),
-//                                         Eigen::Vector3i(-1, 1, -1), Eigen::Vector3i(1, -1, 1),
-//                                         Eigen::Vector3i(1, -1, -1), Eigen::Vector3i(-1, 1, 1)
-//    };
+/*    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
+                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
+                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1),
+
+                                         Eigen::Vector3i(-1, -1, 0), Eigen::Vector3i(1, 1, 0),
+                                         Eigen::Vector3i(0, -1, -1), Eigen::Vector3i(0, 1, 1),
+                                         Eigen::Vector3i(-1, 0, -1), Eigen::Vector3i(1, 0, 1),
+                                         Eigen::Vector3i(-1, 1, 0), Eigen::Vector3i(1, -1, 0),
+                                         Eigen::Vector3i(0, -1, 1), Eigen::Vector3i(0, 1, -1),
+                                         Eigen::Vector3i(1, 0, -1), Eigen::Vector3i(-1, 0, 1),
+
+                                         Eigen::Vector3i(-2, 0, 0), Eigen::Vector3i(2, 0, 0),
+                                         Eigen::Vector3i(0, -2, 0), Eigen::Vector3i(0, 2, 0),
+                                         Eigen::Vector3i(0, 0, -2), Eigen::Vector3i(0, 0, 2),
+
+                                         Eigen::Vector3i(-1, -1, -1), Eigen::Vector3i(1, 1, 1),
+                                         Eigen::Vector3i(-1, -1, 1), Eigen::Vector3i(1, 1, -1),
+                                         Eigen::Vector3i(-1, 1, -1), Eigen::Vector3i(1, -1, 1),
+                                         Eigen::Vector3i(1, -1, -1), Eigen::Vector3i(-1, 1, 1)
+    }; */
 
 //    const static int num_dirs_ = 62; // faces 3 steps
-//    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
-//                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
-//                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1),
-//
-//                                         Eigen::Vector3i(-1, -1, 0), Eigen::Vector3i(1, 1, 0),
-//                                         Eigen::Vector3i(0, -1, -1), Eigen::Vector3i(0, 1, 1),
-//                                         Eigen::Vector3i(-1, 0, -1), Eigen::Vector3i(1, 0, 1),
-//                                         Eigen::Vector3i(-1, 1, 0), Eigen::Vector3i(1, -1, 0),
-//                                         Eigen::Vector3i(0, -1, 1), Eigen::Vector3i(0, 1, -1),
-//                                         Eigen::Vector3i(1, 0, -1), Eigen::Vector3i(-1, 0, 1),
-//
-//                                         Eigen::Vector3i(-1, -1, -1), Eigen::Vector3i(1, 1, 1),
-//                                         Eigen::Vector3i(-1, -1, 1), Eigen::Vector3i(1, 1, -1),
-//                                         Eigen::Vector3i(-1, 1, -1), Eigen::Vector3i(1, -1, 1),
-//                                         Eigen::Vector3i(1, -1, -1), Eigen::Vector3i(-1, 1, 1),
-//
-//                                         Eigen::Vector3i(-2, 0, 0), Eigen::Vector3i(2, 0, 0),
-//                                         Eigen::Vector3i(0, -2, 0), Eigen::Vector3i(0, 2, 0),
-//                                         Eigen::Vector3i(0, 0, -2), Eigen::Vector3i(0, 0, 2),
-//
-//                                         Eigen::Vector3i(-2, -1, 0), Eigen::Vector3i(2, 1, 0),
-//                                         Eigen::Vector3i(0, -2, -1), Eigen::Vector3i(0, 2, 1),
-//                                         Eigen::Vector3i(-2, 0, -1), Eigen::Vector3i(2, 0, 1),
-//                                         Eigen::Vector3i(-2, 1, 0), Eigen::Vector3i(2, -1, 0),
-//                                         Eigen::Vector3i(0, -2, 1), Eigen::Vector3i(0, 2, -1),
-//                                         Eigen::Vector3i(2, 0, -1), Eigen::Vector3i(-2, 0, 1),
-//
-//                                         Eigen::Vector3i(-1, -2, 0), Eigen::Vector3i(1, 2, 0),
-//                                         Eigen::Vector3i(0, -1, -2), Eigen::Vector3i(0, 1, 2),
-//                                         Eigen::Vector3i(-1, 0, -2), Eigen::Vector3i(1, 0, 2),
-//                                         Eigen::Vector3i(-1, 2, 0), Eigen::Vector3i(1, -2, 0),
-//                                         Eigen::Vector3i(0, -1, 2), Eigen::Vector3i(0, 1, -2),
-//                                         Eigen::Vector3i(1, 0, -2), Eigen::Vector3i(-1, 0, 2),
-//
-//                                         Eigen::Vector3i(-3, 0, 0), Eigen::Vector3i(3, 0, 0),
-//                                         Eigen::Vector3i(0, -3, 0), Eigen::Vector3i(0, 3, 0),
-//                                         Eigen::Vector3i(0, 0, -3), Eigen::Vector3i(0, 0, 3)};
+/*    const Eigen::Vector3i dirs_[num_dirs_] = {Eigen::Vector3i(-1, 0, 0), Eigen::Vector3i(1, 0, 0),
+                                         Eigen::Vector3i(0, -1, 0), Eigen::Vector3i(0, 1, 0),
+                                         Eigen::Vector3i(0, 0, -1), Eigen::Vector3i(0, 0, 1),
+
+                                         Eigen::Vector3i(-1, -1, 0), Eigen::Vector3i(1, 1, 0),
+                                         Eigen::Vector3i(0, -1, -1), Eigen::Vector3i(0, 1, 1),
+                                         Eigen::Vector3i(-1, 0, -1), Eigen::Vector3i(1, 0, 1),
+                                         Eigen::Vector3i(-1, 1, 0), Eigen::Vector3i(1, -1, 0),
+                                         Eigen::Vector3i(0, -1, 1), Eigen::Vector3i(0, 1, -1),
+                                         Eigen::Vector3i(1, 0, -1), Eigen::Vector3i(-1, 0, 1),
+
+                                         Eigen::Vector3i(-1, -1, -1), Eigen::Vector3i(1, 1, 1),
+                                         Eigen::Vector3i(-1, -1, 1), Eigen::Vector3i(1, 1, -1),
+                                         Eigen::Vector3i(-1, 1, -1), Eigen::Vector3i(1, -1, 1),
+                                         Eigen::Vector3i(1, -1, -1), Eigen::Vector3i(-1, 1, 1),
+
+                                         Eigen::Vector3i(-2, 0, 0), Eigen::Vector3i(2, 0, 0),
+                                         Eigen::Vector3i(0, -2, 0), Eigen::Vector3i(0, 2, 0),
+                                         Eigen::Vector3i(0, 0, -2), Eigen::Vector3i(0, 0, 2),
+
+                                         Eigen::Vector3i(-2, -1, 0), Eigen::Vector3i(2, 1, 0),
+                                         Eigen::Vector3i(0, -2, -1), Eigen::Vector3i(0, 2, 1),
+                                         Eigen::Vector3i(-2, 0, -1), Eigen::Vector3i(2, 0, 1),
+                                         Eigen::Vector3i(-2, 1, 0), Eigen::Vector3i(2, -1, 0),
+                                         Eigen::Vector3i(0, -2, 1), Eigen::Vector3i(0, 2, -1),
+                                         Eigen::Vector3i(2, 0, -1), Eigen::Vector3i(-2, 0, 1),
+
+                                         Eigen::Vector3i(-1, -2, 0), Eigen::Vector3i(1, 2, 0),
+                                         Eigen::Vector3i(0, -1, -2), Eigen::Vector3i(0, 1, 2),
+                                         Eigen::Vector3i(-1, 0, -2), Eigen::Vector3i(1, 0, 2),
+                                         Eigen::Vector3i(-1, 2, 0), Eigen::Vector3i(1, -2, 0),
+                                         Eigen::Vector3i(0, -1, 2), Eigen::Vector3i(0, 1, -2),
+                                         Eigen::Vector3i(1, 0, -2), Eigen::Vector3i(-1, 0, 2),
+
+                                         Eigen::Vector3i(-3, 0, 0), Eigen::Vector3i(3, 0, 0),
+                                         Eigen::Vector3i(0, -3, 0), Eigen::Vector3i(0, 3, 0),
+                                         Eigen::Vector3i(0, 0, -3), Eigen::Vector3i(0, 0, 3)}; */
 
 // endregion
 
