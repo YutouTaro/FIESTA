@@ -1,5 +1,9 @@
 # test_fiesta.cpp阅读笔记
 
+- ## 论文arXiv链接: https://arxiv.org/abs/1903.02144
+
+
+
 ```bash
 # 每个新窗口记得source ros和catkin_ws
 source /opt/ros/melodic/setup.bash && source /home/yutou/catkin_ws/devel/setup.bash
@@ -7,16 +11,22 @@ source /opt/ros/melodic/setup.bash && source /home/yutou/catkin_ws/devel/setup.b
 roslaunch fiesta cow_and_lady.launch
 # 窗口2 运行rosbag
 rosbag play ./rosbag/data.bag
-
 ```
 
+<p> <a name=data_structure></a>
 
+<img src="./pic1/FIESTA Fig3 Data structure.png" alt>
+<em>数据结构示意图. 引自论文 Fig.3 </em>
 
-\* `HASH_TABLE` is disabled in `include/parameters.h`  
+</p>
+
+<!--\* `HASH_TABLE` is disabled in `include/parameters.h`-->  
 
 
 
 ## `include/Fiesta.h`
+
+### Fiesta()
 
 `Fiesta<DepthMsgType, PoseMsgType>::Fiesta(ros::NodeHandle node)`
 
@@ -41,7 +51,9 @@ rosbag play ./rosbag/data.bag
 
 
 
-`void Fiesta<DepthMsgType, PoseMsgType>::PoseCallback(const PoseMsgType &msg)`<a name=PoseCallback></a>
+### PoseCallback()<a name=PoseCallback></a>
+
+`void Fiesta<DepthMsgType, PoseMsgType>::PoseCallback(const PoseMsgType &msg)`
 
 - ![Fiesta-ln441](./pic1/Fiesta-ln441.png)
 - 把 (时间戳, 位置, 姿态) 加入transform_queue_
@@ -51,7 +63,9 @@ rosbag play ./rosbag/data.bag
 
 
 
-`void Fiesta<DepthMsgType, PoseMsgType>::DepthCallback(const DepthMsgType &depth_map)`<a name=DepthCallback></a>
+### DepthCallback()<a name=DepthCallback></a>
+
+`void Fiesta<DepthMsgType, PoseMsgType>::DepthCallback(const DepthMsgType &depth_map)`
 
 - 把 深度图 加入depth_queue_
 - [SynchronizationAndProcess()](#SynchronizationAndProcess)
@@ -60,7 +74,9 @@ rosbag play ./rosbag/data.bag
 
 
 
-`void Fiesta<DepthMsgType, PoseMsgType>::SynchronizationAndProcess()`<a name=SynchronizationAndProcess></a>
+### SynchronizationAndProcess()<a name=SynchronizationAndProcess></a>
+
+`void Fiesta<DepthMsgType, PoseMsgType>::SynchronizationAndProcess()`
 
 当depth_queue_还有深度图时
 
@@ -87,7 +103,9 @@ rosbag play ./rosbag/data.bag
 
 
 
-`void Fiesta<DepthMsgType, PoseMsgType>::RaycastMultithread()`<a name=RaycastMultithread></a>
+### RaycastMultithread()<a name=RaycastMultithread></a>
+
+`void Fiesta<DepthMsgType, PoseMsgType>::RaycastMultithread()`
 
 - parameters\_.ray\_cast\_num\_thread_==0
   - 单线程处理 [RaycastProcess()](#RaycastProcess)
@@ -99,7 +117,9 @@ rosbag play ./rosbag/data.bag
 
 
 
-`void Fiesta<DepthMsgType, PoseMsgType>::RaycastProcess(int i, int part, int tt)`<a name=RaycastProcess></a>
+### RaycastProcess()<a name=RaycastProcess></a>
+
+`void Fiesta<DepthMsgType, PoseMsgType>::RaycastProcess(int i, int part, int tt)`
 
 - ![Fiesta-ln204](./pic1/Fiesta-ln204.png)
 - 对于点云里的每一个点:
@@ -127,7 +147,9 @@ rosbag play ./rosbag/data.bag
 
 
 
-`void Fiesta<DepthMsgType, PoseMsgType>::UpdateEsdfEvent(const ros::TimerEvent & /*event*/)`<a name=UpdateEsdfEvent></a>
+### UpdateEsdfEvent()<a name=UpdateEsdfEvent></a>
+
+`void Fiesta<DepthMsgType, PoseMsgType>::UpdateEsdfEvent(const ros::TimerEvent & /*event*/)`
 
 - cur_pos_ = sync_pos_ 
 - ![Fiesta-ln488](./pic1/Fiesta-ln488.png)
@@ -143,6 +165,17 @@ rosbag play ./rosbag/data.bag
 - 否则[SetUpdateRange()](#SetUpdateRange) 把更新范围设置为 `cur_pos_` $\pm$ `parameters_.radius_` 
 - 更新地图 occupancy状态 [UpdateOccupancy()](#UpdateOccupancy)
 - 更新地图 距离 [UpdateESDF()](#UpdateESDF)
+- 可视化 [Visualization()](#Visualization)
+
+
+
+
+
+### Visualization()<a name=Visualization></a>
+
+`void Fiesta<DepthMsgType, PoseMsgType>::Visualization(ESDFMap *esdf_map, bool global_vis, const std::string &text)` 
+
+- 
 
 
 
@@ -150,7 +183,9 @@ rosbag play ./rosbag/data.bag
 
 ## src/ESDFMap.cpp
 
-`fiesta::ESDFMap::ESDFMap(...)`<a name=ESDFMap></a>
+### ESDFMap()<a name=ESDFMap></a>
+
+`fiesta::ESDFMap::ESDFMap(Eigen::Vector3d origin, double resolution_, int reserve_size)`
 
 array模式
 
@@ -177,14 +212,20 @@ HASH_TABLE模式
 
 
 
-`int fiesta::ESDFMap::SetOccupancy(Eigen::Vector3d pos, int occ)`<a name=SetOccupancy_pos></a>
+### SetOccupancy( pos )<a name=SetOccupancy_pos></a>
+
+`int fiesta::ESDFMap::SetOccupancy(Eigen::Vector3d pos, int occ)`
 
 - `Pos2Vox(pos, vox)` pos转换成vox
 - return [SetOccupancy(vox, occ)](#SetOccupancy_vox)
 
 
 
-`int fiesta::ESDFMap::SetOccupancy(Eigen::Vector3i vox, int occ)` <a name=SetOccupancy_vox></a>
+
+
+### SetOccupancy( vox )<a name=SetOccupancy_vox></a>
+
+`int fiesta::ESDFMap::SetOccupancy(Eigen::Vector3i vox, int occ)` 
 
 - `idx = Vox2Idx(vox)` vox转换成idx
 - 如果vox在地图内
@@ -197,7 +238,11 @@ HASH_TABLE模式
 
 
 
-`bool fiesta::ESDFMap::UpdateOccupancy(bool global_map)`<a name=UpdateOccupancy></a>
+
+
+### UpdateOccupancy()<a name=UpdateOccupancy></a>
+
+`bool fiesta::ESDFMap::UpdateOccupancy(bool global_map)`
 
 - 当occupancy_queue_队列里还有元素时:
 
@@ -205,10 +250,7 @@ HASH_TABLE模式
 
 - idx: 体素xx.point_对应的index
 
-- occupy: 是否占据 0或1
-
-  - 概率是连续数值 >min_occupancy_log_ 
-  - 是或否, 值为1
+- occupy: [Exist(idx)](#Exist)  是否占据(0或1)
 
 - log_odds_update
 
@@ -218,9 +260,8 @@ HASH_TABLE模式
 - 如果distance_buffer_[idx] < 0:
 
   - 距离设为infinity_ (=10000)
-  - InsertIntoList() 
-    - reserved_idx_4_undefined_ (=0) 指向 idx 
-    - **\*TODO\*** 具体解释
+  - 添加新link [InsertIntoList()](#InsertIntoList)
+    - reserved_idx_4_undefined_ (=0) 和 idx 
 
 - 如果(`log_odds_update>=0`(occupied) 且`occupancy_buffer_[idx]`大于阈值clamp_max_log_, )或者
 
@@ -240,26 +281,116 @@ HASH_TABLE模式
   - 加上 log_odds_update
   - 限制在`(clamp_min_log_ , clamp_max_log_) `之间
 
-- 如果现在Exist(idx)判断和更新之前的记录occupy不同:
+- 如果现在[Exist(idx)](#Exist)判断和更新之前的记录occupy不同:
 
   - 现在1, 之前0: 
     - `{xx.point_, 0.0}`加入insert_queue_   (这个vox是障碍物)
   - 现在0, 之前1:
     - `{xx.point_, (double) infinity_}`加入delete_queue_ (最近障碍物距离为无限远)
 
-- return true当`insert_queue_`或`delete_queue_`有元素 (需要增减 *队列*?)
+- return true当`insert_queue_`或`delete_queue_`有元素 (有需要增减的元素)
 
 
 
 
 
-`void fiesta::ESDFMap::UpdateESDF()`<a name=UpdateESDF></a>
+### UpdateESDF()<a name=UpdateESDF></a>
+
+`void fiesta::ESDFMap::UpdateESDF()`
+
+对应论文<u>*Algorithm 2*</u>
+
+**\* 处理insert_queue_**
+
+- ![ESDFMap-ln278](./pic1/ESDFMap-ln278.png)
+
+- `xx`: 取出insert_queue_的元素
+
+- idx: 体素xx.point_对应的index
+
+- vox存在 [Exist(idx)](#Exist) :
+  - 删除旧link [DeleteFromList()](#DeleteFromList)
+    - 原先最近障碍物`Vox2Idx(closest_obstacle_[idx])`和当前idx`idx`
+  - 更新最近障碍物idx = xx.point_ 和 距离 = 0
+  - 添加新link [InsertIntoList()](#InsertIntoList)
+    - `idx` 和 `idx` *最近的障碍物就是自己*
+  - xx加入update_queue_
+- <u>下一个insert_queue_的元素</u>
+
+**\* 处理delete_queue_**
+
+- `xx`: 取出delete_queue_的元素
+- idx: 体素xx.point_对应的index
+- 如果vox不存在 \![Exist(idx)](#Exist) : (需要删除)
+- ![ESDFMap-ln301](./pic1/ESDFMap-ln301.png)
+- 从`obs_idx = head_[idx]`开始, 下一个idx是`next_[obs_idx]` , 直到`undefined_`
+  - 对于obs_vox的每一个邻居 `new_pos = obs_vox + dir `
+    - (dirs_里的每个方向 `dir`)
+    - (根据论文中的实验, 24-connectivities 也就是 **6** *faces* + **12** *edges* + **6** *2-step faces* 效果最好) 
+    - (各种connectivity见代码`./include/parameters.h` `ln18 // Connectivity used in BFS`)
+    - 如果满足条件 `new_pos`在范围内 且 最近障碍物存在:
+      - 计算 obs_vox 和 new_pos最近障碍物的距离
+      - 如果小于当前距离则替换
+      - 不再检查其他方向的邻居 
+        - 是为了加快速度(?)
+  - 从dll链表中删除
+  - ![ESDFMap-ln328](./pic1/ESDFMap-ln328.png)
+  - 如果距离不为undefinded, `{obs_vox, distance}`加入update_queue_
+  - 添加新link [InsertIntoList()](#InsertIntoList)
+    - 新障碍物 和 `obs_idx`
+
+*<u>end of Algorithm 2</u>*
+
+对应论文<u>*Algorithm 1*</u>
+
+**\* 处理update_queue_**
+
+- `xx`: 取出update_queue_的元素
+- idx: 体素xx.point_对应的index
+
+对应论文<u>*Algorithm 3*</u>
+
+- ![ESDFMap-ln348](./pic1/ESDFMap-ln348.png)
+- flag `change`=false (有没有 邻居的最近障碍物 比 自身现在的最近障碍物 近)
+- 对于`dirs_`中的每一个方向, 也就是每一个邻居`new_pos`: (遍历邻居的最近障碍物 来更新自身)
+  - tmp: 邻居的最近障碍物 和 xx 的距离
+  - 如果tmp比当前distance_buffer_[idx]近:
+    - tmp赋值给distance_buffer_[idx]
+    - `change`=true
+    - 删除旧link [DeleteFromList()](#DeleteFromList)
+      - 原先最近障碍物`Vox2Idx(closest_obstacle_[idx])`和当前idx`idx`
+    - 添加新link [InsertIntoList()](#InsertIntoList)
+      - 邻居的最近障碍物 和 当前idx
+    - 更新idx的最近障碍物
+- 如果change == true;
+  - 再把 {xx.point_, distance_buffer_[idx]}加入update_queue_
+    - 而且是队列最后(?)
+
+<u>*end of Algorithm 3*</u>
+
+- ![ESDFMap-ln375](./pic1/ESDFMap-ln375.png)
+- 对于`dirs_`中的每一个方向, 也就是每一个邻居`new_pos`: (遍历邻居, 把自身的最近障碍物 传播给邻居)
+  - 对应的idx `new_pos_id`
+  - tmp: `new_pos` 和 idx最近障碍物 的距离
+  - 如果new_pos的距离 大于 tmp:
+    - 更新距离
+    - 删除旧link [DeleteFromList()](#DeleteFromList)
+      - 邻居原先最近障碍物`Vox2Idx(closest_obstacle_[new_pos_id])`和邻居idx`new_pos_id`
+    - 添加新link [InsertIntoList()](#InsertIntoList)
+      - idx的最近障碍物 和 邻居idx`new_pos_id`
+    - 更新new_pos_id的最近障碍物
+    - 把 {new_pos, tmp}加入update_queue_
+      - 邻居 和 更新后的距离
+
+<u>*end of Algorithm 1*</u>
 
 
 
 
 
-`void fiesta::ESDFMap::SetUpdateRange(Eigen::Vector3d min_pos, Eigen::Vector3d max_pos, bool new_vec)`<a name=SetUpdateRange></a>
+### SetUpdateRange()<a name=SetUpdateRange></a>
+
+`void fiesta::ESDFMap::SetUpdateRange(Eigen::Vector3d min_pos, Eigen::Vector3d max_pos, bool new_vec)`
 
 - ![ESDFMap-ln792](./pic1/ESDFMap-ln792.png)
 - 如果是HASH_TABLE, 确保min_pos和max_pos在 范围min_range\_, max\_range_之间
@@ -271,7 +402,7 @@ HASH_TABLE模式
 
 
 
-`void SetAway()`<a name=SetAway></a>
+### `void SetAway()`<a name=SetAway></a>
 
 - `SetAway(min_vec_, max_vec_)`
 - 对于范围`min_vec_, max_vec_`之间的所有vox坐标:
@@ -285,7 +416,7 @@ HASH_TABLE模式
 
 
 
-`void SetBack()`<a name=SetBack></a>
+### `void SetBack()`<a name=SetBack></a>
 
 - `SetBack(min_vec_, max_vec_)`
 - 对于范围`min_vec_, max_vec_`之间的所有vox坐标:
@@ -295,7 +426,11 @@ HASH_TABLE模式
 
 
 
-`void fiesta::ESDFMap::SetOriginalRange()`<a name=SetOriginalRange></a>
+
+
+### SetOriginalRange()<a name=SetOriginalRange></a>
+
+`void fiesta::ESDFMap::SetOriginalRange()`
 
 - ![ESDFMap-ln812](./pic1/ESDFMap-ln812.png)
   - ​	初始化min_vec\_, max_vec\_ 和 last_min_vec\_, last_max_vec\_
@@ -304,7 +439,64 @@ HASH_TABLE模式
 
 
 
-`bool fiesta::ESDFMap::CheckUpdate()`<a name=CheckUpdate></a>
+### CheckUpdate()<a name=CheckUpdate></a>
+
+`bool fiesta::ESDFMap::CheckUpdate()`
 
 - 检查`occupancy_queue_`队列
   - 不为空 则return true
+
+
+
+
+
+### Exist()<a name=Exist></a>
+
+`bool fiesta::ESDFMap::Exist(const int &idx)` 
+
+- (概率, 连续数值) 大于min_occupancy_log_ 
+- (是或否, 二元)     值为1
+
+
+
+
+
+### DeleteFromList()<a name=DeleteFromList></a>
+
+`void fiesta::ESDFMap::DeleteFromList(int link, int idx)` 
+
+***关于`head_, prev_, next_`参见[数据结构图](#data_structure)***
+
+- 原结构为 上家(也就是`prev_[idx]`) -> idx -> 下家(也就是`next_[idx]`), 现在要把idx抽掉, 变成 上家 -> 下家
+  - *本函数中的上下家指idx的上下家*
+- 如果**上家**不是`undefined_`: 
+  - 上家的next_直接指向下家
+  - `next_[prev_[idx]]` 指定为  `next_[idx]`
+- 否则: 
+  - idx是`link`的head链上的第一个元素, 拿掉后`head_`要指向下家
+  - `head\_[link]` 指定为 `next_[idx]`
+- 如果**下家**不是`undefined_`: 
+  - 下家的`prev_`指向上家
+  - `prev_[next_[idx]]` 指定为 `prev_[idx]`
+- 上下家处理完, **idx自身**断开指向
+  - `prev_[idx] = next_[idx] = undefined_`
+
+
+
+
+
+### InsertIntoList()<a name=InsertIntoList></a>
+
+`void fiesta::ESDFMap::InsertIntoList(int link, int idx)` 
+
+***关于`head_, prev_, next_`参见[数据结构图](#data_structure)***
+
+- 原结构为 `link` -> 头 (也就是`head_[link]`), 现在要把idx插入, 变成 `link` -> `idx` -> 头
+  - *本函数中的上下家指idx的上下家*
+
+- 如果`link`的`head_`没有指定:
+  - `link`的`head_` 指向 `idx`
+- 否则:
+  - 头的`prev_` 指向 `idx`
+  - `idx`的`next_` 指向 头
+  - `link`的**新**`head_`  指向 `idx`
