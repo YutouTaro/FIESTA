@@ -175,7 +175,15 @@ rosbag play ./rosbag/data.bag
 
 `void Fiesta<DepthMsgType, PoseMsgType>::Visualization(ESDFMap *esdf_map, bool global_vis, const std::string &text)` 
 
-- 
+- ![Fiesta-ln144](./pic1/Fiesta-ln144.png)
+- 设置map range
+- 获取 *point_cloud* [GetPointCloud()](#GetPointCloud)
+- publish *point_cloud*
+- 获取*slice_marker* [GetSliceMarker()](#GetSliceMarker)
+- publish *slice_marker*
+- 如果有text
+  - 设置*marker*的信息
+  - publish *marker*
 
 
 
@@ -500,3 +508,39 @@ HASH_TABLE模式
   - 头的`prev_` 指向 `idx`
   - `idx`的`next_` 指向 头
   - `link`的**新**`head_`  指向 `idx`
+
+
+
+
+
+### GetPointCloud()<a name=GetPointCloud></a>
+
+`void fiesta::ESDFMap::GetPointCloud(sensor_msgs::PointCloud &m, int vis_lower_bound, int vis_upper_bound)`
+
+**\*TODO\*** count是怎么来的
+
+- (HASH_TABLE)对于vox_buffer_里的所有点(?) : 
+- (ARRAY)对于范围内的所有点:
+  - 排除不存在和不在范围内的
+  - vox转成pos
+  - pos的坐标push_back到点云`m`里
+
+
+
+### GetSliceMarker()<a name=GetSliceMarker></a>
+
+`void fiesta::ESDFMap::GetSliceMarker(visualization_msgs::Marker &m, int slice, int id, Eigen::Vector4d color, double max_dist)`
+
+- Marker msg的默认设置
+- **\*TODO\*** count是怎么来的
+- (HASH_TABLE)对于vox_buffer_里的所有点(?) : 
+- (ARRAY)对于范围内的所有点:
+  - 排除不存在和不在范围内的
+  - vox转成pos
+  - pos的坐标push_back到`m.points`里
+  - distance_buffer_转成对应颜色push_back到`m.colors`里
+
+
+
+
+
