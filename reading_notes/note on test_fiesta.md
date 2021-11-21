@@ -276,6 +276,7 @@ rosbag play ./rosbag/data.bag
 - 如果distance_buffer_[idx] < 0:
 
   - 距离设为infinity_ (=10000)
+    - *根据[一篇CSDN文章](https://blog.csdn.net/qq_42800654/article/details/112571580)的注释, 小于0意味着这是初始化的赋值负无穷大, undefined_(= -10000). 所以设置成正无穷大以确保接下来的更新一定会更新这个点, 而其他负无穷的点不会被更新影响.*
   - 添加新link [InsertIntoList()](#InsertIntoList)
     - reserved_idx_4_undefined_ (=0) 和 idx 
 
