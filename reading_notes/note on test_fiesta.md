@@ -14,7 +14,6 @@ rosbag play ./rosbag/data.bag
 ```
 
 <p> <a name=data_structure></a>
-
 <img src="./pic1/FIESTA Fig3 Data structure.png" alt>
 <em>数据结构示意图. 引自论文 Fig.3 </em>
 
@@ -82,20 +81,19 @@ rosbag play ./rosbag/data.bag
 
 - *指示flag* new_pos = false
 - depth_time 深度队列里的第一个深度图的时间戳
-- 找到transform_queue_里时间戳最接近的msg
-  - if 时间戳 <= depth_time + ros::Duration(time_delay)
+- 找到transform_queue_里时间戳最接近的msg (最接近指 满足 `时间戳 <= depth_time + ros::Duration(time_delay)`的最后一个)
   - 记录位置和姿态, new_pos = True
   - 从队列里pop掉
   - 直到队列清空或时间戳大于 ...(上面时间)
 - ![Fiesta-ln415](./pic1/Fiesta-ln413.png)
 - transform_ 投影矩阵 深度图坐标系->机体->相机
 - raycast_origin_  原点
-- 如果是深度图
+- 如果msg是深度图
   - 每个点投影到相机(?)坐标系 形成 点云
   - 如果parameters\_.use\_depth\_filter\_
     - 忽略靠近图像边缘的点
     - 每个点重投影到上一张图像比较深度差距, 忽略大于阈值的点
-- 如果是点云
+- 如果msg是点云
   - 从ROSMsg转换成pcl点云
 - 进行raycast [RaycastMultithread()](#RaycastMultithread)
 
@@ -193,9 +191,23 @@ rosbag play ./rosbag/data.bag
 
 ### ESDFMap()<a name=ESDFMap></a>
 
-`fiesta::ESDFMap::ESDFMap(Eigen::Vector3d origin, double resolution_, int reserve_size)`
+(HASH_TABLE)`fiesta::ESDFMap::ESDFMap(Eigen::Vector3d origin, double resolution_, Eigen::Vector3d map_size)`
 
-array模式
+- 设定infinity_ = 10000;
+    undefined_ = -10000;
+    reserved_idx_4_undefined_ = 0;
+- block_ = (1 << block_bit_) 等效于 `pow(2, block_bit_)`
+  - 把 二进制1 左移 block_bit_位
+- [SetOriginalRange()](#SetOriginalRange)
+- 初始化并赋值
+  - 距离distance_buffer_ <- undefined_
+  - occupancy_buffer_	<- 0-free
+  - 最近障碍物坐标closest_obstacle_ <- undefined\_, undefined\_, undefined\_
+  - vox_buffer_ <- undefined\_, undefined\_, undefined\_
+  - num_hit\_, num_miss_ <- 0
+  - head\_, prev\_, next\_ <- undefined_
+
+(ARRAY) `fiesta::ESDFMap::ESDFMap(Eigen::Vector3d origin, double resolution_, Eigen::Vector3d map_size)`
 
 - 输入: Eigen::Vector3d origin 中心, double resolution_ 分辨率, Eigen::Vector3d map_size 地图大小
 - ![ESDFMap-ln171](./pic1/ESDFMap-ln171.png)
@@ -205,16 +217,12 @@ array模式
     - 初始化地图范围, 用min_vec\_和max_vec\_表示
 - ![ESDFMap-ln188](./pic1/ESDFMap-ln188.png)
   - 初始化并赋值
-    - occupancy_buffer_	<-0-free
-    - 距离distance_buffer_ <-undefined_
-    - 最近障碍物坐标closest_obstacle_ <-undefined\_, undefined\_, undefined\_
-    - num_hit\_, num_miss_ <-undefined_
-    - head_ 多一个size <-undefined_
-    - prev\_, next\_ <-undefined_
-
-HASH_TABLE模式
-
-- *****\*TODO\******
+    - occupancy_buffer_	<- 0-free
+    - 距离distance_buffer_ <- undefined_
+    - 最近障碍物坐标closest_obstacle_ <- undefined\_, undefined\_, undefined\_
+    - num_hit\_, num_miss_ <- 0
+    - head_ 多一个size <- undefined_
+    - prev\_, next\_ <- undefined_
 
 
 
