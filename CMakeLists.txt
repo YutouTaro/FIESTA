@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.12)
 project(fiesta)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -71,3 +71,5 @@ target_link_libraries(test_fiesta
         ${OpenCV_LIBS}
         )
 
+add_executable(test_heap
+        test/test_heap.cpp)
