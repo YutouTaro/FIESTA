@@ -91,13 +91,13 @@ Fiesta<DepthMsgType, PoseMsgType>::Fiesta(ros::NodeHandle node) {
      esdf_map_ = new ESDFMap(Eigen::Vector3d(0, 0, 0), parameters_.resolution_, parameters_.reserved_size_); std::cout << "Using HASH_TABLE" << std::endl;
 #ifdef SIGNED_NEEDED
        inv_esdf_map_ = new ESDFMap(Eigen::Vector3d(0, 0, 0), parameters_.resolution_, parameters_.reserved_size_);
-#endif
-#else
+#endif // end of SIGNED_NEEDED
+#else // not HASH_TABLE
      esdf_map_ = new ESDFMap(parameters_.l_cornor_, parameters_.resolution_, parameters_.map_size_); std::cout << "Using ARRAY" << std::endl;
 #ifdef SIGNED_NEEDED
      inv_esdf_map_ = new ESDFMap(parameters_.l_cornor_, parameters_.resolution_, parameters_.map_size_);
 #endif
-#endif
+#endif // end of HASH_TABLE
 
 #ifdef PROBABILISTIC
      esdf_map_->SetParameters(parameters_.p_hit_, parameters_.p_miss_,
