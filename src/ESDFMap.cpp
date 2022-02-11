@@ -5,6 +5,7 @@
 #include "ESDFMap.h"
 #include <math.h>
 #include <time.h>
+#include <utility>
 
 using std::cout;
 using std::endl;
@@ -144,13 +145,13 @@ fiesta::ESDFMap::ESDFMap(Eigen::Vector3d origin, double resolution_, int reserve
   count = 1; // 0 is used for special use
   reserve_size_ = reserve_size + 1;
   occupancy_buffer_.resize(reserve_size_);
-  distance_buffer_.resize(reserve_size_);
+  distance_buffer_.resize(reserve_size_); squared_distance_buffer_.resize(reserve_size_);
   closest_obstacle_.resize(reserve_size_);
   vox_buffer_.resize(reserve_size_);
   num_hit_.resize(reserve_size_);
   num_miss_.resize(reserve_size_);
 
-  std::fill(distance_buffer_.begin(), distance_buffer_.end(), (double) undefined_);
+  std::fill(distance_buffer_.begin(), distance_buffer_.end(), (double) undefined_); std::fill(squared_distance_buffer_.begin(), squared_distance_buffer_.end(), (double) undefined_);
   std::fill(occupancy_buffer_.begin(), occupancy_buffer_.end(), 0);
   std::fill(closest_obstacle_.begin(), closest_obstacle_.end(), Eigen::Vector3i(undefined_, undefined_, undefined_));
   std::fill(vox_buffer_.begin(), vox_buffer_.end(), Eigen::Vector3i(undefined_, undefined_, undefined_));
@@ -283,13 +284,13 @@ void fiesta::ESDFMap::UpdateESDF() {
       // Exist after a whole brunch of updates
       // delete previous link & create a new linked-list
       DeleteFromList(Vox2Idx(closest_obstacle_[idx]), idx);
-      closest_obstacle_[idx] = xx.point_;
-      distance_buffer_[idx] = 0.0;
+      closest_obstacle_[idx] = xx.point_; xx.closest_obstacle_ = xx.point_;
+      distance_buffer_[idx] = 0.0; xx.distance_ = 0.0; xx.squared_distance_ = 0.0;
       InsertIntoList(idx, idx);
-      update_queue_.push(xx);
+      update_queue_.push(xx); distance_heap_.push(xx);
     }
-  }
-  while (!delete_queue_.empty()) {
+  } int num = 0, qsize = delete_queue_.size();
+  while (!delete_queue_.empty()) { std::cout << "Delete[" << ++num << "/" << qsize << "]\n";
     QueueElement xx = delete_queue_.front();
 
     delete_queue_.pop();
@@ -327,15 +328,16 @@ void fiesta::ESDFMap::UpdateESDF() {
 
         distance_buffer_[obs_idx] = distance;
         if (distance < infinity_) {
-          update_queue_.push(QueueElement{obs_vox, distance});
+          update_queue_.push(QueueElement{obs_vox, distance}); distance_heap_.push(QueueElement{obs_vox, distance});
         }
         int new_obs_idx = Vox2Idx(closest_obstacle_[obs_idx]);
         InsertIntoList(new_obs_idx, obs_idx);
       } // for obs_idx
       head_[idx] = undefined_;
     } // if
-  } // delete_queue_
+  } std::cout << "delete finish\n";// delete_queue_
   int times = 0, change_num = 0;
+#ifdef UPDATE_QUEUE
   while (!update_queue_.empty()) {
     QueueElement xx = update_queue_.front();
 //            QueueElement xx = update_queue_.top();
@@ -390,6 +392,66 @@ void fiesta::ESDFMap::UpdateESDF() {
       }
     }
   }
+#else
+    std::cout << "Initial size " << distance_heap_.size() << std::endl;
+    while (!distance_heap_.empty()) {
+      QueueElement xx = distance_heap_.top();
+      double current_batch_sqr_dist_ = xx.squared_distance_;
+      std::vector<HeapElement> heap_buffer_;
+      while (!distance_heap_.empty() && abs(xx.squared_distance_ - current_batch_sqr_dist_) < 1e-3 ) {
+          int idx = Vox2Idx(xx.point_);
+          if (xx.distance_ == distance_buffer_[idx]){
+              times++;
+              bool change = false;
+              for (const Eigen::Vector3i &dir : dirs_){
+                  Eigen::Vector3i new_pos = xx.point_ + dir;
+                  if (VoxInRange(new_pos)){
+                      int new_pos_idx = Vox2Idx(new_pos);
+                      if (closest_obstacle_[new_pos_idx](0) != undefined_){
+                          double tmp = Dist(xx.point_, closest_obstacle_[new_pos_idx]);
+
+                          if (distance_buffer_[idx] > tmp){
+                              distance_buffer_[idx] = tmp;
+                              change = true;
+                              DeleteFromList(Vox2Idx(closest_obstacle_[idx]), idx);
+
+                              int new_obs_idx = Vox2Idx(closest_obstacle_[new_pos_idx]);
+                              InsertIntoList(new_pos_idx, idx);
+                              closest_obstacle_[idx] = closest_obstacle_[new_pos_idx];
+                          }
+                      }
+                  }
+              }
+
+              if (change){
+                  change_num++;
+                  distance_heap_.push(QueueElement{xx.point_, distance_buffer_[idx]});
+              } else{
+                  int new_obs_idx = Vox2Idx(closest_obstacle_[idx]);
+                  for (const Eigen::Vector3i &dir : dirs_){
+                      Eigen::Vector3i new_pos = xx.point_ + dir;
+                      if (VoxInRange(new_pos)){
+                          int new_pos_id = Vox2Idx(new_pos);
+
+                          double tmp = Dist(new_pos, closest_obstacle_[idx]);
+                          if (distance_buffer_[new_pos_id] > tmp) {
+                              distance_buffer_[new_pos_id] = tmp;
+                              DeleteFromList(Vox2Idx(closest_obstacle_[new_pos_id]), new_pos_id);
+
+                              InsertIntoList(new_obs_idx, new_pos_id);
+                              closest_obstacle_[new_pos_id] = closest_obstacle_[idx];
+                              distance_heap_.push(QueueElement{new_pos, tmp});
+                          }
+                      }
+                  }
+              }
+          }
+          distance_heap_.pop(); // pop out the processed element from heap
+          xx = distance_heap_.top(); // next element
+      }
+    }
+    std::queue<QueueElement>().swap(update_queue_); // clear the queue
+#endif
   total_time_ += times;
   cout << "Expanding " << times << " nodes, with change_num = " << change_num << ", accumulator = " << total_time_
        << endl;
@@ -704,13 +766,13 @@ void fiesta::ESDFMap::GetSliceMarker(visualization_msgs::Marker &m, int slice, i
 #ifdef HASH_TABLE
 void fiesta::ESDFMap::IncreaseCapacity(int &old_size, int new_size) {
   occupancy_buffer_.resize(new_size);
-  distance_buffer_.resize(new_size);
+  distance_buffer_.resize(new_size); squared_distance_buffer_.resize(new_size);
   closest_obstacle_.resize(new_size);
   vox_buffer_.resize(new_size);
   num_hit_.resize(new_size);
   num_miss_.resize(new_size);
 
-  std::fill(distance_buffer_.begin() + old_size, distance_buffer_.end(), (double) undefined_);
+  std::fill(distance_buffer_.begin() + old_size, distance_buffer_.end(), (double) undefined_); std::fill(squared_distance_buffer_.begin() + old_size, squared_distance_buffer_.end(), (double) undefined_);
   std::fill(occupancy_buffer_.begin() + old_size, occupancy_buffer_.end(), 0);
   std::fill(closest_obstacle_.begin() + old_size, closest_obstacle_.end(),
             Eigen::Vector3i(undefined_, undefined_, undefined_));
@@ -749,7 +811,7 @@ int fiesta::ESDFMap::FindAndInsert(Eigen::Vector3i hash_key) {
   if (tmp == hash_table_.end()) {
     hash_table_.insert(std::make_pair(block_id, count));
 #ifdef BITWISE
-    block_id = block_id.unaryExpr([&](const int x) { return x << block_bit_; });
+    block_id = block_id.unaryExpr([&](const int x) { return x << block_bit_; }); // the elements becomes multiples of 2^block_bit_, i.e. the starting coordinate of the block
 #else
     block_id = block_id * block_;
 #endif

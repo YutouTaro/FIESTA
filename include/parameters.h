@@ -12,6 +12,7 @@
 #define BITWISE
 #define DEBUG
 //#define SIGNED_NEEDED
+//#define UPDATE_QUEUE
 
 namespace fiesta {
 

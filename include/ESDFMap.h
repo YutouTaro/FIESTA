@@ -9,6 +9,7 @@
 #include <iostream>
 #include <visualization_msgs/Marker.h>
 #include <queue>
+#include <utility>
 #include <vector>
 #include <unordered_map>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -37,13 +38,38 @@ struct MatrixHash : std::unary_function<transform_, size_t> {
 class ESDFMap {
   // Type of queue element to be used in priority queue
   struct QueueElement {
-    Eigen::Vector3i point_;
-    double distance_;
+      QueueElement(Eigen::Vector3i point, double distance){
+          this->point_ = std::move(point);
+          this->distance_ = distance;
+          this->squared_distance_ = distance * distance;
+      }
+      QueueElement(Eigen::Vector3i point, double distance, Eigen::Vector3i closest_obstacle){
+          this->point_ = std::move(point);
+          this->distance_ = distance;
+          this->closest_obstacle_ = std::move(closest_obstacle);
+          this->squared_distance_ = distance * distance;
+      }
+      Eigen::Vector3i point_;
+      double distance_;
+      Eigen::Vector3i closest_obstacle_;
+      double squared_distance_;
     bool operator<(const QueueElement &element) const {
-      return distance_ > element.distance_;
+      return squared_distance_ > element.squared_distance_;
     }
   };
-
+    typedef std::pair<Eigen::Vector3i/*point*/, double/*sqr_dist*/> HeapElement; //typedef std::vector<HeapElement>::iterator HeapIter;
+    struct cmp_QueueElement{
+        bool operator() (QueueElement element1, QueueElement element2){
+            return element1.squared_distance_ > element2.squared_distance_;
+        }
+    };
+//    struct cmp_HeapElement{
+//        bool operator() (HeapElement element1, HeapElement element2){
+//            return element1.first > element2.first;
+//        }
+//    };
+//    typedef std::priority_queue<HeapElement , std::vector<HeapElement>, cmp_HeapElement> DistanceHeap;
+    typedef std::priority_queue<QueueElement , std::vector<QueueElement>, cmp_QueueElement> DistanceHeap;
 
  private:
   // parameters & method for occupancy information updating
@@ -85,14 +111,14 @@ class ESDFMap {
 #else
   std::vector<unsigned char> occupancy_buffer_;  // 0 is free, 1 is occupied
 #endif
-  std::vector<double> distance_buffer_;
+  std::vector<double> distance_buffer_; std::vector<double> squared_distance_buffer_;
   std::vector<int> num_hit_, num_miss_;
   std::vector<Eigen::Vector3i> closest_obstacle_;
   std::vector<int> head_, prev_, next_;
 
   std::queue<QueueElement> insert_queue_;
   std::queue<QueueElement> delete_queue_;
-  std::queue<QueueElement> update_queue_;
+  std::queue<QueueElement> update_queue_; DistanceHeap distance_heap_;
   std::queue<QueueElement> occupancy_queue_;
 
 // Map Properties
