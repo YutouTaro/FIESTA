@@ -72,4 +72,11 @@ target_link_libraries(test_fiesta
         )
 
 add_executable(test_heap
-        test/test_heap.cpp)
+        test/test_heap.cpp
+#        include/ESDFMap_backup.h
+#        src/ESDFMap_backup.cpp
+        )
+
+add_executable(test_IPQ
+        test/test_IPQ.cpp
+        include/IndexedPriorityQueue.h)
